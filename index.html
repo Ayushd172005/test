@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPOVista — Indian IPO Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">IPO<em>Vista</em></span>
+    </div>
+    <nav class="nav-pills">
+      <button class="pill active" data-view="search">Search</button>
+      <button class="pill" data-view="market">Market</button>
+      <button class="pill" data-view="leaderboard">Top IPOs</button>
+    </nav>
+  </header>
+
+  <!-- HERO SEARCH VIEW -->
+  <section class="view active" id="view-search">
+    <div class="hero">
+      <p class="hero-tag">Indian IPO Analytics · 2010–2022 · 319 IPOs</p>
+      <h1 class="hero-title">Decode Every<br/><span class="accent">IPO.</span></h1>
+      <p class="hero-sub">Search any company. Instantly see subscription, listing gains, investor sentiment, and comparative benchmarks.</p>
+
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input id="searchInput" type="text" placeholder="Type company name…" autocomplete="off" spellcheck="false" />
+          <button id="searchBtn">Analyse</button>
+        </div>
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+
+      <div class="quick-chips">
+        <span class="chip-label">Trending:</span>
+        <button class="chip" data-name="Zomato">Zomato</button>
+        <button class="chip" data-name="LIC India">LIC India</button>
+        <button class="chip" data-name="Paytm">Paytm</button>
+        <button class="chip" data-name="Coal India">Coal India</button>
+        <button class="chip" data-name="Nykaa">Nykaa</button>
+      </div>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div class="results-panel hidden" id="resultsPanel">
+      <div class="results-inner">
+        <button class="back-btn" id="backBtn">← Back to Search</button>
+
+        <!-- Company Header -->
+        <div class="company-header">
+          <div class="company-badge" id="companyBadge">Z</div>
+          <div class="company-info">
+            <h2 class="company-name" id="companyName">Zomato</h2>
+            <p class="company-meta" id="companyMeta">Listed 23 Jul 2021 · Issue Price ₹76</p>
+          </div>
+          <div class="listing-badge" id="listingBadge">+65.6%</div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <p class="kpi-label">Issue Size</p>
+            <p class="kpi-value" id="kpi-size">—</p>
+            <p class="kpi-sub">₹ Crore</p>
+          </div>
+          <div class="kpi-card">
+            <p class="kpi-label">Total Subscription</p>
+            <p class="kpi-value" id="kpi-sub">—</p>
+            <p class="kpi-sub">times oversubscribed</p>
+          </div>
+          <div class="kpi-card">
+            <p class="kpi-label">QIB Subscription</p>
+            <p class="kpi-value" id="kpi-qib">—</p>
+            <p class="kpi-sub">Institutional investors</p>
+          </div>
+          <div class="kpi-card">
+            <p class="kpi-label">HNI Subscription</p>
+            <p class="kpi-value" id="kpi-hni">—</p>
+            <p class="kpi-sub">High Net-worth Individuals</p>
+          </div>
+          <div class="kpi-card">
+            <p class="kpi-label">RII Subscription</p>
+            <p class="kpi-value" id="kpi-rii">—</p>
+            <p class="kpi-sub">Retail Individual Investors</p>
+          </div>
+          <div class="kpi-card highlight">
+            <p class="kpi-label">Listing Day Gain</p>
+            <p class="kpi-value" id="kpi-gain">—</p>
+            <p class="kpi-sub">vs. Issue Price</p>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3 class="chart-title">Subscription Breakdown</h3>
+            <p class="chart-sub">How different investor categories subscribed</p>
+            <div class="chart-wrap">
+              <canvas id="subChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-title">vs. Market Benchmark</h3>
+            <p class="chart-sub">Listing gain compared to similar-era IPOs</p>
+            <div class="chart-wrap">
+              <canvas id="benchChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- SENTIMENT METER -->
+        <div class="sentiment-card">
+          <h3 class="chart-title">Investor Sentiment Score</h3>
+          <p class="chart-sub">Composite score based on subscription & listing performance</p>
+          <div class="sentiment-bar-wrap">
+            <div class="sentiment-bar">
+              <div class="sentiment-fill" id="sentimentFill"></div>
+              <div class="sentiment-needle" id="sentimentNeedle"></div>
+            </div>
+            <div class="sentiment-labels">
+              <span>Bearish</span><span>Neutral</span><span>Bullish</span>
+            </div>
+          </div>
+          <div class="sentiment-score-wrap">
+            <span class="sentiment-score" id="sentimentScore">72</span>
+            <span class="sentiment-tag" id="sentimentTag">Strong Bullish</span>
+          </div>
+        </div>
+
+        <!-- SECTOR PEERS -->
+        <div class="peers-section">
+          <h3 class="chart-title">IPOs Around the Same Period</h3>
+          <p class="chart-sub">Other companies that listed within 90 days</p>
+          <div class="peers-grid" id="peersGrid"></div>
+        </div>
+
+        <!-- ANALYST CARD -->
+        <div class="analyst-card">
+          <div class="analyst-icon">◎</div>
+          <div class="analyst-body">
+            <h3 id="analystTitle">Analysis Summary</h3>
+            <p id="analystText">Loading analysis…</p>
+          </div>
+          <div class="analyst-verdict" id="analystVerdict"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MARKET OVERVIEW VIEW -->
+  <section class="view" id="view-market">
+    <div class="page-header">
+      <h2>Market Overview</h2>
+      <p>Year-by-year IPO performance across the Indian market</p>
+    </div>
+
+    <div class="market-stats">
+      <div class="stat-block">
+        <p class="stat-n" id="stat-total">319</p>
+        <p class="stat-label">Total IPOs (2010–22)</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-n" id="stat-avg-gain">—</p>
+        <p class="stat-label">Avg Listing Gain</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-n" id="stat-positive">—</p>
+        <p class="stat-label">Positive Listings</p>
+      </div>
+      <div class="stat-block">
+        <p class="stat-n" id="stat-biggest">—</p>
+        <p class="stat-label">Best Gainer</p>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card wide">
+        <h3 class="chart-title">Average Listing Gains by Year</h3>
+        <div class="chart-wrap tall">
+          <canvas id="yearChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 class="chart-title">IPO Count by Year</h3>
+        <div class="chart-wrap">
+          <canvas id="countChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Gain Distribution</h3>
+        <div class="chart-wrap">
+          <canvas id="distChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD VIEW -->
+  <section class="view" id="view-leaderboard">
+    <div class="page-header">
+      <h2>Top IPOs Leaderboard</h2>
+      <p>Ranked by listing day performance</p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-sort="gain-desc">🏆 Best Gainers</button>
+      <button class="filter-btn" data-sort="gain-asc">📉 Worst Performers</button>
+      <button class="filter-btn" data-sort="sub-desc">🔥 Most Subscribed</button>
+      <button class="filter-btn" data-sort="size-desc">💰 Largest IPOs</button>
+    </div>
+
+    <div class="leaderboard-table">
+      <div class="lb-header">
+        <span>#</span>
+        <span>Company</span>
+        <span>Date</span>
+        <span>Issue Price</span>
+        <span>Subscription</span>
+        <span>Listing Gain</span>
+      </div>
+      <div id="leaderboardRows"></div>
+    </div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
